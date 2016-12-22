@@ -43,7 +43,6 @@ export default class SwipeCards extends Component {
     yupStyle: React.PropTypes.object,
     nopeStyle: React.PropTypes.object,
     style: React.PropTypes.object,
-    onClickHandler: React.PropTypes.func,
     renderCard: React.PropTypes.func,
     cardRemoved: React.PropTypes.func,
     dragY: React.PropTypes.bool,
@@ -91,8 +90,7 @@ export default class SwipeCards extends Component {
     nopeTextStyle: {
       fontSize: 16,
       color: 'red',
-    }
-    onClickHandler: () => null,
+    },
     cardRemoved: (ix) => null,
     renderCard: (card) => null,
     style: {
@@ -147,11 +145,6 @@ export default class SwipeCards extends Component {
       onPanResponderRelease: (e, {vx, vy, dx, dy}) => {
         this.state.pan.flattenOffset();
         let velocity;
-        if ((dx === 0) && (dy === 0))   //meaning the gesture did not cover any distance
-        {
-          Alert.alert('click!')
-          this.props.onClickHandler(this.state.card)
-        }
 
         if (vx > 0) {
           velocity = clamp(vx, 3, 5);
@@ -358,7 +351,7 @@ export default class SwipeCards extends Component {
           ]
         };
 
-        return <Animated.View key={card[this.props.cardKey]} style={[styles.card, animatedCardStyles]} {... this._panResponder.panHandlers}>
+        return <Animated.View key={card[this.props.cardKey]} style={animatedCardStyles} {... this._panResponder.panHandlers}>
           {this.props.renderCard(this.state.card)}
         </Animated.View>;
       }
@@ -382,7 +375,7 @@ export default class SwipeCards extends Component {
 
     let animatedCardStyles = { transform: [{ translateX }, { translateY }, { rotate }, { scale }], opacity };
 
-    return <Animated.View key={"top"} style={[styles.card, animatedCardStyles]} {... this._panResponder.panHandlers}>
+    return <Animated.View key={"top"} style={animatedCardStyles} {... this._panResponder.panHandlers}>
       {this.props.renderCard(this.state.card)}
     </Animated.View>;
   }
