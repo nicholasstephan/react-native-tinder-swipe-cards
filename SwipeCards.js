@@ -75,7 +75,7 @@ export default class SwipeCards extends Component {
     handleYup: React.PropTypes.func,
     handleNope: React.PropTypes.func,
     yupText: React.PropTypes.string,
-    noText: React.PropTypes.string,
+    nopeText: React.PropTypes.string,
     onClickHandler: React.PropTypes.func,
     renderCard: React.PropTypes.func,
     cardRemoved: React.PropTypes.func,
