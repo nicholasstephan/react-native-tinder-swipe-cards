@@ -4,54 +4,18 @@
 import React, { Component } from 'react';
 
 import {
-  StyleSheet,
   Text,
   View,
   Animated,
   PanResponder,
-  Image
+  Image,
+  Alert,
 } from 'react-native';
 
 import clamp from 'clamp';
-
 import Defaults from './Defaults.js';
 
 const SWIPE_THRESHOLD = 120;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  yup: {
-    borderColor: 'green',
-    borderWidth: 2,
-    position: 'absolute',
-    padding: 20,
-    bottom: 20,
-    borderRadius: 5,
-    right: 20,
-  },
-  yupText: {
-    fontSize: 16,
-    color: 'green',
-  },
-  nope: {
-    borderColor: 'red',
-    borderWidth: 2,
-    position: 'absolute',
-    bottom: 20,
-    padding: 20,
-    borderRadius: 5,
-    left: 20,
-  },
-  nopeText: {
-    fontSize: 16,
-    color: 'red',
-  }
-});
 
 //Components could be unloaded and loaded and we will loose the users currentIndex, we can persist it here.
 let currentIndex = {};
@@ -76,10 +40,15 @@ export default class SwipeCards extends Component {
     handleNope: React.PropTypes.func,
     yupText: React.PropTypes.string,
     nopeText: React.PropTypes.string,
+    yupStyle: React.PropTypes.object,
+    nopeStyle: React.PropTypes.object,
+    style: React.PropTypes.object,
     onClickHandler: React.PropTypes.func,
     renderCard: React.PropTypes.func,
     cardRemoved: React.PropTypes.func,
-    dragY: React.PropTypes.bool
+    dragY: React.PropTypes.bool,
+    yupTextStyle: React.PropTypes.object,
+    nopeTextStyle: React.PropTypes.object,
   };
 
   static defaultProps = {
@@ -97,10 +66,41 @@ export default class SwipeCards extends Component {
     handleNope: (card) => null,
     nopeText: "Nope!",
     yupText: "Yup!",
-    onClickHandler: () => { alert('tap') },
+    yupStyle: {
+      borderColor: 'green',
+      borderWidth: 2,
+      position: 'absolute',
+      padding: 20,
+      bottom: 20,
+      borderRadius: 5,
+      right: 20,
+    },
+    nopeStyle: {
+      borderColor: 'red',
+      borderWidth: 2,
+      position: 'absolute',
+      bottom: 20,
+      padding: 20,
+      borderRadius: 5,
+      left: 20,
+    },
+    yupTextStyle: {
+      fontSize: 16,
+      color: 'green',
+    },
+    nopeTextStyle: {
+      fontSize: 16,
+      color: 'red',
+    }
+    onClickHandler: () => null,
     cardRemoved: (ix) => null,
     renderCard: (card) => null,
-    style: styles.container,
+    style: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    },
     dragY: true
   };
 
@@ -149,6 +149,7 @@ export default class SwipeCards extends Component {
         let velocity;
         if ((dx === 0) && (dy === 0))   //meaning the gesture did not cover any distance
         {
+          Alert.alert('click!')
           this.props.onClickHandler(this.state.card)
         }
 
@@ -389,17 +390,18 @@ export default class SwipeCards extends Component {
   renderNope() {
     let {pan} = this.state;
 
-    let nopeOpacity = pan.x.interpolate({ inputRange: [-150, 0], outputRange: [1, 0] });
-    let nopeScale = pan.x.interpolate({ inputRange: [-150, 0], outputRange: [1, 0.5], extrapolate: 'clamp' });
-    let animatedNopeStyles = { transform: [{ scale: nopeScale }], opacity: nopeOpacity };
-
     if (this.props.renderNope) {
       return this.props.renderNope(pan);
     }
 
+    const nopeOpacity = pan.x.interpolate({ inputRange: [-150, 0], outputRange: [1, 0] });
+    const nopeScale = pan.x.interpolate({ inputRange: [-150, 0], outputRange: [1, 0.5], extrapolate: 'clamp' });
+    const animatedNopeStyles = { transform: [{ scale: nopeScale }], opacity: nopeOpacity };
+    const { nopeStyle, nopeText, nopeTextStyle } = this.props;
+
     if (this.props.showNope) {
-      return <Animated.View style={[styles.nope, animatedNopeStyles]}>
-        <Text style={styles.nopeText}>{this.props.nopeText}</Text>
+      return <Animated.View style={[nopeStyle, animatedNopeStyles]}>
+        <Text style={nopeTextStyle}>{this.props.nopeText}</Text>
       </Animated.View>;
     }
 
@@ -409,17 +411,18 @@ export default class SwipeCards extends Component {
   renderYup() {
     let {pan} = this.state;
 
-    let yupOpacity = pan.x.interpolate({ inputRange: [0, 150], outputRange: [0, 1] });
-    let yupScale = pan.x.interpolate({ inputRange: [0, 150], outputRange: [0.5, 1], extrapolate: 'clamp' });
-    let animatedYupStyles = { transform: [{ scale: yupScale }], opacity: yupOpacity };
-
     if (this.props.renderYup) {
       return this.props.renderYup(pan);
     }
 
+    const yupOpacity = pan.x.interpolate({ inputRange: [0, 150], outputRange: [0, 1] });
+    const yupScale = pan.x.interpolate({ inputRange: [0, 150], outputRange: [0.5, 1], extrapolate: 'clamp' });
+    const animatedYupStyles = { transform: [{ scale: yupScale }], opacity: yupOpacity };
+    const { yupStyle, yupText, yupTextStyle } = this.props;
+
     if (this.props.showYup) {
-      return <Animated.View style={[styles.yup, animatedYupStyles]}>
-        <Text style={styles.yupText}>{this.props.yupText}</Text>
+      return <Animated.View style={[yupStyle, animatedYupStyles]}>
+        <Text style={yupTextStyle}>{yupText}</Text>
       </Animated.View>;
     }
 
@@ -427,8 +430,9 @@ export default class SwipeCards extends Component {
   }
 
   render() {
+    const { style } = this.props;
     return (
-      <View style={styles.container}>
+      <View style={style}>
         {this.props.stack ? this.renderStack() : this.renderCard()}
         {this.renderNope()}
         {this.renderYup()}
