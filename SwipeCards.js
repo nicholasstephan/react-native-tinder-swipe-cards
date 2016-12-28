@@ -138,6 +138,10 @@ export default class SwipeCards extends Component {
 
       onPanResponderTerminationRequest: (evt, gestureState) => this.props.allowGestureTermination,
 
+      onPanResponderTerminate: (e, {vx, vy, dx, dy}) => {
+        this._resetPan();
+      },
+
       onPanResponderMove: Animated.event([
         null, { dx: this.state.pan.x, dy: this.props.dragY ? this.state.pan.y : 0 },
       ]),
